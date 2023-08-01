@@ -1,6 +1,6 @@
 def branch = "staging"
 def repo = "git@github.com:galantixa/be-dumbmerch.git"
-def cred = "monitor"
+def cred = "ssh-key"
 def dir = "~/be-dumbmerch"
 def server = "appserver@103.139.193.35"
 def imagename = "dumbmerch-be"
@@ -15,7 +15,7 @@ pipeline {
                 script {
                     sshagent(credentials: [cred]) {
                         sh """
-                            ssh -o StrictHostKeyChecking=no -T ${server} << EOF
+                            ssh -o StrictHostKeyChecking=no -i my-ssh-key.pem  ${server} << EOF
                                 git clone ${repo}
                                 cd ${dir}
                                 git checkout ${branch}
