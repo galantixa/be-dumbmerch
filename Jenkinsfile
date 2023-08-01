@@ -15,7 +15,7 @@ pipeline {
                 script {
                     sshagent(credentials: [cred]) {
                         sh """
-                            ssh -o StrictHostKeyChecking=no -i my-ssh-key.pem -T  ${server} << EOF
+                            ssh -o StrictHostKeyChecking=no -T  ${server} << EOF
                                 git clone ${repo}
                                 cd ${dir}
                                 git checkout ${branch}
