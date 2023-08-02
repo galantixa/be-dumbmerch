@@ -16,11 +16,10 @@ pipeline {
                     sshagent(credentials: [cred]) {
                         sh """
                             ssh -o StrictHostKeyChecking=no -T ${server} << EOF
-                                rm -rf ${dir}
-                                git clone ${repo}
+                                git clone ${repo} || true
                                 cd ${dir}
-                                git checkout ${branch}
-                                git pull origin ${branch}
+                                git checkout ${branch} || true
+                                git pull origin ${branch} || true
                                 exit
                             EOF
                         """
@@ -71,7 +70,7 @@ pipeline {
                             ssh -o StrictHostKeyChecking=no -T ${server} << EOF
                                 docker login -u ${dockerusername} -p ${dockerpass}
                                 docker image tag ${imagename}:latest ${dockerusername}/${imagename}:latest
-                                docker image push ${dockerusername}/${imagename}:latest
+                                docker image push ${dockerusername}/${imagename}:latest 
                                 docker image rm ${dockerusername}/${imagename}:latest
                                 exit
                             EOF
