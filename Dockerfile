@@ -11,4 +11,3 @@ COPY .env /app/.env
 ENV ENV_FILE_PATH=/app/.env
 EXPOSE 5000
 CMD ["/app/app"]
-
