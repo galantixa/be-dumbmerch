@@ -52,8 +52,8 @@ pipeline {
                         sh """
                             ssh -o StrictHostKeyChecking=no -T ${server} << EOF
                                 cd ${dir}
-                                docker container stop ${imagename}
-                                docker container rm ${imagename}
+                                docker container stop ${imagename} || true
+                                docker container rm ${imagename} || true
                                 docker run -d -p 3000:3000 --name="${imagename}" ${imagename}:latest
                                 exit
                             EOF
