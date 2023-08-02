@@ -60,7 +60,7 @@ pipeline {
                                 cd ${dir}
                                 docker container stop ${imagename} || true
                                 docker container rm ${imagename} || true
-                                docker run -d -p 5001:5000 --name="${imagename}" ${imagename}:latest
+                                docker run -d -p 5000:5000 --name="${imagename}" ${imagename}:latest
                                 exit
                             EOF
                         """
