@@ -9,6 +9,6 @@ FROM gcr.io/distroless/base-debian11
 COPY --from=builder /app/app /app/app
 COPY .env /app/.env
 ENV ENV_FILE_PATH=/app/.env
-EXPOSE 8080
+EXPOSE 5000
 CMD ["/app/app"]
 
