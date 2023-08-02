@@ -1,9 +1,9 @@
 def branch = "staging"
 def repo = "git@github.com:galantixa/be-dumbmerch.git"
-def cred = "ssh-key"
+def cred = "monitor"
 def dir = "~/be-dumbmerch"
 def server = "appserver@103.139.193.35"
-def imagename = "dumbmerch-be"
+def imagename = "dumbmerch-be-staging"
 def dockerusername = "galantixa"
 def dockerpass = "dckr_pat_-uWxmibjWrkcl0syj8SQG2hOOJM"
 
@@ -16,10 +16,10 @@ pipeline {
                     sshagent(credentials: [cred]) {
                         sh """
                             ssh -o StrictHostKeyChecking=no -T  ${server} << EOF
-                                git clone ${repo}
+                                git clone ${repo} || true
                                 cd ${dir}
-                                git checkout ${branch}
-                                git pull origin ${branch}
+                                git checkout ${branch} || true
+                                git pull origin ${branch} || true
                                 exit
                             EOF
                         """
@@ -50,9 +50,8 @@ pipeline {
                     sshagent(credentials: [cred]) {
                         sh """
                             ssh -o StrictHostKeyChecking=no -T ${server} << EOF
-                                cd ${dir}
-                                docker container stop ${imagename}
-                                docker container rm ${imagename}
+                                docker container stop ${imagename} || true
+                                docker container rm ${imagename} || true
                                 docker run -d -p 3000:3000 --name="${imagename}" ${imagename}:latest
                                 exit
                             EOF
