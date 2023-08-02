@@ -9,30 +9,18 @@ def dockerpass = "dckr_pat_-uWxmibjWrkcl0syj8SQG2hOOJM"
 
 pipeline {
     agent any
-
-    post {
-        always {
-            discordSend description: "Pipeline build", 
-                        footer: "Galantixa DevOps",
-                        link: env.BUILD_URL,
-                        result: currentBuild.resultIsBetterOrEqualTo('SUCCESS'),
-                        title: JOB_NAME,
-                        webhookURL: "https://discord.com/api/webhooks/1136155760070512710/HCt4LQL74vsufx7itH-tIz6JrsFVDqsuyUQzy7akT_pF4h_RKBJG7XcAJKeBiCKXOdWZ"
-        }
-    }
-
     stages {
         stage('Repo pull') {
             steps {
                 script {
                     sshagent(credentials: [cred]) {
                         sh """
-                            ssh -o StrictHostKeyChecking=no -T  ${server} << EOF
-				rm -rf ${dir}
-                                git clone ${repo} || true
+                            ssh -o StrictHostKeyChecking=no -T ${server} << EOF
+                                rm -rf ${dir}
+                                git clone ${repo}
                                 cd ${dir}
-                                git checkout ${branch} || true
-                                git pull origin ${branch} || true
+                                git checkout ${branch}
+                                git pull origin ${branch}
                                 exit
                             EOF
                         """
@@ -63,6 +51,7 @@ pipeline {
                     sshagent(credentials: [cred]) {
                         sh """
                             ssh -o StrictHostKeyChecking=no -T ${server} << EOF
+                                cd ${dir}
                                 docker container stop ${imagename} || true
                                 docker container rm ${imagename} || true
                                 docker run -d -p 5001:5000 --name="${imagename}" ${imagename}:latest
@@ -90,6 +79,17 @@ pipeline {
                     }
                 }
             }
+        }
+    }
+    
+    post {
+        always {
+            discordSend description: "Pipeline build",
+                        footer: "Galantixa DevOps",
+                        link: env.BUILD_URL,
+                        result: currentBuild.resultIsBetterOrEqualTo('SUCCESS'),
+                        title: JOB_NAME,
+                        webhookURL: "https://discord.com/api/webhooks/1136155760070512710/HCt4LQL74vsufx7itH-tIz6JrsFVDqsuyUQzy7akT_pF4h_RKBJG7XcAJKeBiCKXOdWZ"
         }
     }
 }
