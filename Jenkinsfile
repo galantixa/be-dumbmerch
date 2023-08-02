@@ -50,7 +50,6 @@ pipeline {
                     sshagent(credentials: [cred]) {
                         sh """
                             ssh -o StrictHostKeyChecking=no -T ${server} << EOF
-                                cd ${dir}
                                 docker container stop ${imagename} || true
                                 docker container rm ${imagename} || true
                                 docker run -d -p 5000:5000 --restart=always --name="${imagename}" ${imagename}:latest
