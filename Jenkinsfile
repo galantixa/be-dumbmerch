@@ -1,5 +1,5 @@
 def branch = "production"
-def repo = "https://github.com/galantixa/be-dumbmerch.git"
+def repo = "git@github.com:galantixa/be-dumbmerch.git"
 def cred = "monitoring"
 def dir = "~/be-dumbmerch"
 def server = "galantixa@35.240.192.107"
