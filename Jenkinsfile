@@ -17,7 +17,6 @@ pipeline {
                     sshagent(credentials: [cred]) {
                         sh """
                             ssh -o StrictHostKeyChecking=no -T ${server} << EOF
-                                rm -rf ${dir} || true
                                 git clone ${repo}
                                 cd ${dir}
                                 git checkout ${branch}
@@ -57,6 +56,7 @@ pipeline {
                                 docker image push ${dockerusername}/${imagename}:latest
                                 docker image rm ${dockerusername}/${imagename}:latest
                                 docker image rm ${imagename}:latest || true
+                                cd && rm -rf ${dir}
                                 exit
                             EOF
                         """
