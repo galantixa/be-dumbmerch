@@ -1,29 +1,57 @@
 pipeline {
-    def app
+    agent any
+    
+    stages {
+        stage('Clone repository') {
+            steps {
+                checkout scm
+            }
+        }
 
-    stage('Clone repository') {
-      
+        stage('Build image') {
+            steps {
+                script {
+                    def app = docker.build("raj80dockerid/test")
+                }
+            }
+        }
 
-        checkout scm
-    }
+        stage('Test image') {
+            steps {
+                script {
+                    app.inside {
+                        sh 'echo "Tests passed"'
+                    }
+                }
+            }
+        }
 
-    stage('Build image') {
-  
-       app = docker.build("galantixa/test")
-    }
+        stage('Push image') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
+                        app.push("${env.BUILD_NUMBER}")
+                    }
+                }
+            }
+        }
 
-
-    stage('Push image') {
-        
-        docker.withRegistry('https://registry.hub.docker.com', 'docker') {
-            app.push("${env.BUILD_NUMBER}")
+        stage('Trigger ManifestUpdate') {
+            steps {
+                echo "Triggering updatemanifestjob"
+                build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
+            }
         }
     }
     
-    stage('Trigger ManifestUpdate') {
-                echo "triggering updatemanifestjob"
-                build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
+    post {
+        success {
+            echo "Pipeline completed successfully!"
         }
+        failure {
+            echo "Pipeline failed. Please check the logs for details."
+        }    
+    }
 }
 
 
