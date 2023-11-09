@@ -20,7 +20,7 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    sh "docker build -t ${imagename} ${dir}"
+                    sh "docker build -t ${imagename} ."
                     sh "cd ${dir} && rm -rf *"
                 }
             }
