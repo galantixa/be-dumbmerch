@@ -1,52 +1,55 @@
-pipeline {
-    agent any
+def branch = "production"
+def repo = "https://github.com/galantixa/be-dumbmerch.git"
+def dir = "be-dumbmerch" 
+def imagename = "dumbmerch-be-production"
+def dockerusername = "galantixa"
+def cred = "docker"
+def app
+
+node {
+    agent any 
     
-    environment {
-        GIT_BRANCH = 'production'
-        REPO_URL = 'https://github.com/galantixa/be-dumbmerch.git'
-        DIR_NAME = 'be-dumbmerch'
-        IMAGE_NAME = 'dumbmerch-be-production'
-        DOCKER_USERNAME = 'galantixa'
-    }
-
     stages {
-        stage('Pull Repository') {
-            steps {
-                checkout([$class: 'GitSCM', branches: [[name: GIT_BRANCH]], userRemoteConfigs: [[url: REPO_URL]]])
-            }
-        }
-
         stage('Clone') {
             steps {
-                git branch: GIT_BRANCH, url: REPO_URL, directory: DIR_NAME
+                script {
+                    git branch: branch, url: repo
+                }
             }
         }
 
-        stage('Build Image') {
+        stage('Build') {
             steps {
-                sh "docker build -t ${DOCKER_USERNAME}/${IMAGE_NAME}:latest ${DIR_NAME}"
+                script {
+                    sh "docker build -t ${imagename}:v1 ${dir}"
+                    sh "cd ${dir} && rm -rf *"
+                }
             }
         }
-
+        
         stage('Push Image') {
             steps {
-                docker.withRegistry('https://registry.hub.docker.com', 'docker') {
-                    sh "docker tag ${DOCKER_USERNAME}/${IMAGE_NAME}:latest ${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
-                    sh "docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker') {
+                        sh "docker tag ${imagename}:v1 ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
+                        sh "docker push ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
+                        sh "docker rmi ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
+                        sh "docker rmi ${imagename} || true"
+                    }
+                }
+            }
+        }
+        
+        stage('Update Manifest') {
+            steps {
+                script {
+                    build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
                 }
             }
         }
     }
-
-    post {
-        success {
-            echo 'Pipeline selesai. Semua tahapan berhasil.'
-        }
-        failure {
-            echo 'Pipeline gagal. Mohon periksa log untuk detail kesalahan.'
-        }
-    }
 }
+
 
 
 
