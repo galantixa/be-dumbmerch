@@ -1,10 +1,12 @@
+def branch = "production"
+def repo = "https://github.com/galantixa/be-dumbmerch.git"
+def dir = "be-dumbmerch" 
+def imagename = "dumbmerch-be-production"
+def dockerusername = "galantixa"
+def cred = "docker"
+
 pipeline {
     agent any
-
-    environment {
-        IMAGE_NAME = 'dumbmerch-be-production'
-        DOCKER_REGISTRY = 'docker.io'
-    }
 
     stages {
         stage('Checkout') {
@@ -18,29 +20,31 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    sh "docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${env.BUILD_NUMBER} ."
+                    sh "docker build -t ${dockerusername}/${dockerimage} ."
                 }
             }
         }
 
-        stage('Push') {
+        stage('Push Image') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} ${DOCKER_REGISTRY}"
-                        sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker') {
+                        sh "docker tag ${dockerusername}:${dockerimage} ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
+                        sh "docker push ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
+                        sh "docker rmi ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
+                        sh "docker rmi ${imagename} || true"
                     }
                 }
             }
         }
-    }
 
-    post {
-        success {
-            echo "Pipeline completed successfully!"
-        }
-        failure {
-            echo "Pipeline failed. Please check the logs for details."
+        post {
+            success {
+                echo "Pipeline completed successfully!"
+            }
+            failure {
+                echo "Pipeline failed. Please check the logs for details."
+            }    
         }
     }
 }
