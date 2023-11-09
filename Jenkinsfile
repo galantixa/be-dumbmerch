@@ -25,11 +25,13 @@ pipeline {
         
         stage('Push Image') {
             steps {
+                script {
                     docker.withRegistry('https://registry.hub.docker.com', 'docker') {
                         sh "docker tag ${imagename}:v1 ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
                         sh "docker push ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
                         sh "docker rmi ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
                         sh "docker rmi ${imagename} || true"
+                    }
                 }
             }
         }
