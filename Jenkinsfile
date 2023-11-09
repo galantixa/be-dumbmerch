@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKERUSERNAME = "galantixa"
-        DOCKER_IMAGE_NAME = 'dumbmerch-be-production'
+        DOCKER_IMAGE_NAME = 'production-dumbmerch-be'
         DOCKER_REGISTRY = 'https://registry.hub.docker.com/v2/' 
     }
 
@@ -31,7 +31,7 @@ pipeline {
                         def imageTag = "${DOCKERUSERNAME}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
                         sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin ${DOCKER_REGISTRY}"
                         sh "docker tag ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} ${imageTag}"
-                        sh "docker push ${DOCKERUSERNAME}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                        sh "docker push ${imageTag}"
                     }
                 }
             }
