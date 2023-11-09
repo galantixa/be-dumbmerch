@@ -19,8 +19,7 @@ pipeline {
                     script {
                     git branch: branch, 
                         credentialsId: GIT_CREDENTIALS, 
-                        url: repo, 
-                        sshAgent: null 
+                        url: repo
                 }
                 }
             }
