@@ -5,7 +5,7 @@ def imagename = "dumbmerch-be-production"
 def dockerusername = "galantixa"
 def cred = "docker"
 
-node {
+pipeline {
     agent any 
     
     stages {
