@@ -1,15 +1,8 @@
-def branch = "production"
-def repo = "https://github.com/galantixa/be-dumbmerch.git"
-def dir = "be-dumbmerch"
-def imagename = "dumbmerch-be-production"
-def dockerusername = "galantixa"
-def cred = "docker"
-def app
-
 pipeline {
     agent any
 
     environment {
+        DOCKERUSERNAME = "galantixa"
         DOCKER_IMAGE_NAME = 'dumbmerch-be-production'
         DOCKER_REGISTRY = 'https://registry.hub.docker.com/v2/' 
     }
@@ -35,10 +28,10 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        def imageTag = "${dockerusername}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                        def imageTag = "${DOCKERUSERNAME}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
                         sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin ${DOCKER_REGISTRY}"
                         sh "docker tag ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} ${imageTag}"
-                        sh "docker push ${imageTag}"
+                        sh "docker push ${DOCKERUSERNAME}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
                     }
                 }
             }
