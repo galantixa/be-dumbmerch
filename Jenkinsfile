@@ -13,7 +13,15 @@ pipeline {
         GIT_CREDENTIALS = credentials('github') // Sesuaikan dengan ID kredensial yang telah Anda buat
         REPO_URL = 'https://github.com/galantixa/be-dumbmerch.git'
     }
+
     stages {
+        stage('Install Git') {
+            steps {
+                script {
+                    sh 'apt-get update && apt-get install -y git'
+                }
+            }
+        }
         stage('Clone') {
             steps {
                 withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
