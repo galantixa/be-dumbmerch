@@ -30,7 +30,7 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')])  {
                         def imageTag = "${dockerusername}/${dockerimage}:${env.BUILD_NUMBER}"
-                        docker login -u ${DOCKER_USERNAME} --password-stdin https://registry.hub.docker.com"
+                        sh "docker login -u ${DOCKER_USERNAME} --password-stdin https://registry.hub.docker.com"
                         // Tag the image
                         sh "docker tag ${dockerimage}:${env.BUILD_NUMBER} ${imageTag}"
 
