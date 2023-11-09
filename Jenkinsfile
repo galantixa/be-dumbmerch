@@ -14,11 +14,11 @@ pipeline {
                 script {
                     // git branch: branch, url: repo
                     // sh "git clone ${repo}"
-                    // sh "cd ${dir}"
-                    // sh "git checkout ${branch}"
-                    // sh "git pull origin ${branch}"
-                    // sh "cd"
                     checkout scm
+                    sh "cd ${dir}"
+                    sh "git checkout ${branch}"
+                    sh "git pull origin ${branch}"
+                    sh "cd"
                 }
             }
         }
