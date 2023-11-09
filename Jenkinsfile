@@ -24,19 +24,25 @@ pipeline {
             }
         }
 
-        stage('Push Image') {
+        stage('login') {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'docker', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        def imageTag = "${DOCKERUSERNAME}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
-                        sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin ${DOCKER_REGISTRY}"
-                        sh "docker tag ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} ${imageTag}"
-                        sh "docker push ${imageTag}"
+                    sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin"
                     }
                 }
             }
         }
 
+        stage ('push image') {
+            steps {
+                script{
+                    def imageTag = "${DOCKERUSERNAME}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "docker tag ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} ${imageTag}"
+                    sh "docker push ${imageTag}"
+                }
+            }
+        }
         stage('Update Manifest') {
             steps {
                 script {
