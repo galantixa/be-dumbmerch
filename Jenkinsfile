@@ -30,7 +30,6 @@ pipeline {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', 'docker') {
                         def imageTag = "${dockerusername}/${dockerimage}:${env.BUILD_NUMBER}"
-                        sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin ${https://registry.hub.docker.com}"
                         // Tag the image
                         sh "docker tag ${dockerimage}:${env.BUILD_NUMBER} ${imageTag}"
 
