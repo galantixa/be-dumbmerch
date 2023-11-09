@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     environment {
-        GIT_REPO = 'https://github.com/galantixa/be-dumbmerch.git'
+        GIT_REPO = 'git@github.com:galantixa/be-dumbmerch.git'
         IMAGE_NAME = 'dumbmerch-be-production'
         DOCKER_USERNAME = 'galantixa'
     }
