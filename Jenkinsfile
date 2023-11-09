@@ -28,8 +28,9 @@ pipeline {
         stage('Push Image') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker') {
+                    withCredentials([usernamePassword(credentialsId: 'docker', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')])  {
                         def imageTag = "${dockerusername}/${dockerimage}:${env.BUILD_NUMBER}"
+                        sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin "
                         // Tag the image
                         sh "docker tag ${dockerimage}:${env.BUILD_NUMBER} ${imageTag}"
 
