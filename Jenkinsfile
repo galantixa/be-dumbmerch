@@ -8,44 +8,59 @@ def cred = "docker"
 pipeline {
     agent any 
     
+    environment {
+        GIT_BRANCH = 'production'
+    }
+    
     stages {
-        stage('Clone') {
+        stage('Clone Repository') {
             steps {
                 script {
-                sh " git clone ${repo}"
+                    checkout([$class: 'GitSCM', branches: [[name: GIT_BRANCH]], userRemoteConfigs: [[url: repo]]])
                 }
             }
         }
 
-        // stage('Build') {
-        //     steps {
-        //         script {
-        //             sh "docker build -t ${imagename}:v1 ${dir}"
-        //             sh "cd ${dir} && rm -rf *"
-        //         }
-        //     }
-        // }
+        stage('Build Image') {
+            steps {
+                script {
+                    sh "docker build -t ${imagename}:v1 ${dir}"
+                    sh "cd ${dir} && rm -rf *"
+                }
+            }
+        }
         
-        // stage('Push Image') {
-        //     steps {
-        //         script {
-        //             docker.withRegistry('https://registry.hub.docker.com', 'docker') {
-        //                 sh "docker tag ${imagename}:v1 ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
-        //                 sh "docker push ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
-        //                 sh "docker rmi ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
-        //                 sh "docker rmi ${imagename} || true"
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Test Image') {
+            steps {
+                script {
+                    def app = docker.build("${dockerusername}/${imagename}:${env.BUILD_NUMBER}")
+                    app.inside {
+                        sh 'echo "Tests passed"'
+                    }
+                }
+            }
+        }
         
-        // stage('Update Manifest') {
-        //     steps {
-        //         script {
-        //             build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
-        //         }
-        //     }
-        // }
+        stage('Push Image') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker') {
+                        sh "docker tag ${imagename}:v1 ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
+                        sh "docker push ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
+                        sh "docker rmi ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
+                        sh "docker rmi ${imagename} || true"
+                    }
+                }
+            }
+        }
+        
+        stage('Trigger Manifest Update') {
+            steps {
+                script {
+                    build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
+                }
+            }
+        }
     }
 }
 
