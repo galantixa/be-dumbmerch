@@ -1,5 +1,5 @@
 def branch = "production"
-def repo = "git@github.com:galantixa/be-dumbmerch.git"
+def repo = "https://github.com/galantixa/be-dumbmerch.git"
 def dir = "be-dumbmerch" 
 def imagename = "dumbmerch-be-production"
 def dockerusername = "galantixa"
@@ -8,16 +8,16 @@ def cred = "docker"
 pipeline {
     agent any
 
-    stages ('checkout'){
+    stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                checkout([$class: 'GitSCM', branches: [[name: branch]], userRemoteConfigs: [[url: repo]]])
             }
         }
 
         stage('Build') {
             steps {
-                    sh "docker build -t ${dockerusername}/${dockerimage} ."
+                sh "docker build -t ${dockerusername}/${imagename} ."
             }
         }
 
@@ -25,24 +25,26 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', 'docker') {
-                        sh "docker tag ${dockerusername}:${dockerimage} ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
+                        sh "docker tag ${dockerusername}/${imagename} ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
                         sh "docker push ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
                         sh "docker rmi ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
-                        sh "docker rmi ${imagename} || true"
+                        sh "docker rmi ${dockerusername}/${imagename} || true"
                     }
                 }
             }
         }
     }
+
     post {
-            success {
-                echo "Pipeline completed successfully!"
-            }
-            failure {
-                echo "Pipeline failed. Please check the logs for details."
-            }    
+        success {
+            echo "Pipeline completed successfully!"
         }
+        failure {
+            echo "Pipeline failed. Please check the logs for details."
+        }    
+    }
 }
+
 
 
 
