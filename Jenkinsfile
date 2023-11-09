@@ -12,36 +12,29 @@ pipeline {
     stages {
         stage('Pull Repository') {
             steps {
-                script {
                     checkout([$class: 'GitSCM', branches: [[name: GIT_BRANCH]], userRemoteConfigs: [[url: REPO_URL]]])
-                }
             }
         }
 
         stage('Clone') {
             steps {
-                script {
                     git branch: GIT_BRANCH, url: REPO_URL, directory: DIR_NAME
-                }
             }
         }
 
         stage('Build Image') {
             steps {
-                script {
                     sh "docker build -t ${IMAGE_NAME}:latest ${DIR_NAME}"
-                }
+
             }
         }
 
         stage('Push Image') {
             steps {
-                script {
                     docker.withRegistry('https://registry.hub.docker.com', 'docker') {
                         sh "docker tag ${IMAGE_NAME}:v1 ${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
                         sh "docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
                     }
-                }
             }
         }
     }
