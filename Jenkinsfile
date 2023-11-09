@@ -1,6 +1,6 @@
 def branch = "production"
 def repo = "https://github.com/galantixa/be-dumbmerch.git"
-def dir = "be-dumbmerch" 
+def dir = "be-dumbmerch"
 def imagename = "dumbmerch-be-production"
 def dockerusername = "galantixa"
 def cred = "docker"
@@ -8,6 +8,12 @@ def app
 
 pipeline {
     agent any
+
+    environment {
+        DOCKER_IMAGE_NAME = 'dumbmerch-be-production'
+        DOCKER_REGISTRY = 'https://hub.docker.com/' 
+    }
+
     stages {
         stage('Clone') {
             steps {
@@ -20,27 +26,24 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    sh "docker build -t ${imagename} ."
+                    sh "docker build -t ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} ."
                 }
             }
         }
-        
+
         stage('Push Image') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'docker', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')])  {
-                        def imageTag = "${dockerusername}/${dockerimage}:${env.BUILD_NUMBER}"
-                        sh "docker login -u ${DOCKER_USERNAME} --password-stdin https://registry.hub.docker.com"
-                        // Tag the image
-                        sh "docker tag ${dockerimage}:${env.BUILD_NUMBER} ${imageTag}"
-
-                        // Push the image
+                    withCredentials([usernamePassword(credentialsId: 'docker', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        def imageTag = "${dockerusername}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                        sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin ${DOCKER_REGISTRY}"
+                        sh "docker tag ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} ${imageTag}"
                         sh "docker push ${imageTag}"
                     }
                 }
             }
         }
-        
+
         stage('Update Manifest') {
             steps {
                 script {
