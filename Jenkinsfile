@@ -15,12 +15,7 @@ pipeline {
     stages {
         stage('Clone') {
             steps {
-                script {
-                    script {
-                    git branch: branch, 
-                        credentialsId: GIT_CREDENTIALS, 
-                        url: repo
-                }
+                checkout scm
                 }
             }
         }
