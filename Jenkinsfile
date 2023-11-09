@@ -13,15 +13,16 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                 checkout([$class: 'GitSCM', branches: [[name: branch]], userRemoteConfigs: [[url: repo, credentialsId: 'github']]])
+                sh "docker build -t ${dockerusername}/${imagename} ."
                 }
             }
         }
 
-        stage('Build') {
-            steps {
-                sh "docker build -t ${dockerusername}/${imagename} ."
-            }
-        }
+        // stage('Build') {
+        //     steps {
+        //         sh "docker build -t ${dockerusername}/${imagename} ."
+        //     }
+        // }
 
         stage('Push Image') {
             steps {
