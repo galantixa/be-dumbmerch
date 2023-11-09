@@ -1,19 +1,13 @@
-def branch = "production"
-def repo = "git@github.com:galantixa/be-dumbmerch.git"
-def dir = "be-dumbmerch" 
-def imagename = "dumbmerch-be-production"
-def dockerusername = "galantixa"
-def cred = "docker"
-
 pipeline {
     agent any
-    
+
     environment {
-        GIT_CREDENTIALS = credentials('github')
+        IMAGE_NAME = 'dumbmerch-be-production'
+        DOCKER_REGISTRY = 'docker.io'
     }
-    
+
     stages {
-        stage('Clone') {
+        stage('Checkout') {
             steps {
                 script {
                     checkout scm
@@ -24,29 +18,18 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    sh "docker build -t ${imagename}:v1 ${dir}"
-                    sh "cd ${dir} && rm -rf *"
+                    sh "docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${env.BUILD_NUMBER} ."
                 }
             }
         }
-        
-        stage('Push Image') {
+
+        stage('Push') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker') {
-                        sh "docker tag ${imagename}:v1 ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
-                        sh "docker push ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
-                        sh "docker rmi ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
-                        sh "docker rmi ${imagename} || true"
+                    withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} ${DOCKER_REGISTRY}"
+                        sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
                     }
-                }
-            }
-        }
-        
-        stage('Update Manifest') {
-            steps {
-                script {
-                    build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
                 }
             }
         }
@@ -54,13 +37,14 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline selesai. Semua tahapan berhasil.'
+            echo "Pipeline completed successfully!"
         }
         failure {
-            echo 'Pipeline gagal. Mohon periksa log untuk detail kesalahan.'
+            echo "Pipeline failed. Please check the logs for details."
         }
     }
 }
+
 
 
 
