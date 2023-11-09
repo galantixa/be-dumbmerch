@@ -1,18 +1,15 @@
-def branch = "production"
-def repo = "https://github.com/galantixa/be-dumbmerch.git"
-def dir = "be-dumbmerch" 
-def imagename = "dumbmerch-be-production"
-def dockerusername = "galantixa"
-def cred = "docker"
-
-node {
-    agent any 
+pipeline {
+    agent any
+    
+    environment {
+        GIT_CREDENTIALS = credentials('github') // Sesuaikan dengan ID kredensial yang telah Anda buat
+    }
     
     stages {
         stage('Clone') {
             steps {
                 script {
-                    git branch: branch, url: repo
+                    git branch: branch, credentialsId: GIT_CREDENTIALS, url: repo
                 }
             }
         }
@@ -45,6 +42,15 @@ node {
                     build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline selesai. Semua tahapan berhasil.'
+        }
+        failure {
+            echo 'Pipeline gagal. Mohon periksa log untuk detail kesalahan.'
         }
     }
 }
