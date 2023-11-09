@@ -1,51 +1,29 @@
-def branch = "production"
-def repo = "git@github.com:galantixa/be-dumbmerch.git"
-def dir = "be-dumbmerch" 
-def imagename = "dumbmerch-be-production"
-def dockerusername = "galantixa"
-def cred = "docker"
-
 pipeline {
-    agent any
+    def app
 
-    stages {
-        stage('Checkout') {
-            steps {
-                withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-                checkout([$class: 'GitSCM', branches: [[name: branch]], userRemoteConfigs: [[url: repo, credentialsId: 'github']]])
-                sh "docker build -t ${dockerusername}/${imagename} ."
-                }
-            }
-        }
+    stage('Clone repository') {
+      
 
-        // stage('Build') {
-        //     steps {
-        //         sh "docker build -t ${dockerusername}/${imagename} ."
-        //     }
-        // }
-
-        stage('Push Image') {
-            steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker') {
-                        sh "docker tag ${dockerusername}/${imagename} ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
-                        sh "docker push ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
-                        sh "docker rmi ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
-                        sh "docker rmi ${dockerusername}/${imagename} || true"
-                    }
-                }
-            }
-        }
+        checkout scm
     }
 
-    post {
-        success {
-            echo "Pipeline completed successfully!"
-        }
-        failure {
-            echo "Pipeline failed. Please check the logs for details."
-        }    
+    stage('Build image') {
+  
+       app = docker.build("galantixa/test")
     }
+
+
+    stage('Push image') {
+        
+        docker.withRegistry('https://registry.hub.docker.com', 'docker') {
+            app.push("${env.BUILD_NUMBER}")
+        }
+    }
+    
+    stage('Trigger ManifestUpdate') {
+                echo "triggering updatemanifestjob"
+                build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
+        }
 }
 
 
