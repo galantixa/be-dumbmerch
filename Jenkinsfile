@@ -6,7 +6,7 @@ def dockerusername = "galantixa"
 def cred = "docker"
 def app
 
-node {
+pipeline {
     agent any 
     
     stages {
