@@ -16,6 +16,7 @@ pipeline {
     stages {
         stage('Clone') {
             steps {
+                sh 'apt-get update && apt-get install -y git'
                 withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                         sh "git clone ${GIT_USERNAME}:${GIT_PASSWORD}@${REPO_URL}"
                     }
