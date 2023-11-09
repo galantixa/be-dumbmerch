@@ -12,7 +12,7 @@ pipeline {
         stage('Clone') {
             steps {
                 script {
-                    git branch: branch, url: repo
+                    checkout scm
                 }
             }
         }
