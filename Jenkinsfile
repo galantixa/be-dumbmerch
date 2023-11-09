@@ -4,15 +4,21 @@ def dir = "be-dumbmerch"
 def imagename = "dumbmerch-be-production"
 def dockerusername = "galantixa"
 def cred = "docker"
-def app
+
 
 pipeline {
     agent any 
     
+    environment {
+        GIT_CREDENTIALS = credentials('github') // Sesuaikan dengan ID kredensial yang telah Anda buat
+        REPO_URL = 'https://github.com/galantixa/be-dumbmerch.git'
+    }
     stages {
         stage('Clone') {
             steps {
-                sh "git clone ${repo}"
+                withCredentials([usernamePassword(credentialsId: GIT_CREDENTIALS, passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                        sh "git clone ${GIT_USERNAME}:${GIT_PASSWORD}@${REPO_URL}"
+                    }
             }
         }
 
