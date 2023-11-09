@@ -1,5 +1,5 @@
 def branch = "production"
-def repo = "https://github.com/galantixa/be-dumbmerch.git"
+def repo = "git@github.com:galantixa/be-dumbmerch.git"
 def dir = "be-dumbmerch" 
 def imagename = "dumbmerch-be-production"
 def dockerusername = "galantixa"
