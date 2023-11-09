@@ -12,29 +12,28 @@ pipeline {
     stages {
         stage('Pull Repository') {
             steps {
-                    checkout([$class: 'GitSCM', branches: [[name: GIT_BRANCH]], userRemoteConfigs: [[url: REPO_URL]]])
+                checkout([$class: 'GitSCM', branches: [[name: GIT_BRANCH]], userRemoteConfigs: [[url: REPO_URL]]])
             }
         }
 
         stage('Clone') {
             steps {
-                    git branch: GIT_BRANCH, url: REPO_URL, directory: DIR_NAME
+                git branch: GIT_BRANCH, url: REPO_URL, directory: DIR_NAME
             }
         }
 
         stage('Build Image') {
             steps {
-                    sh "docker build -t ${IMAGE_NAME}:latest ${DIR_NAME}"
-
+                sh "docker build -t ${IMAGE_NAME}:latest ${DIR_NAME}"
             }
         }
 
         stage('Push Image') {
             steps {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker') {
-                        sh "docker tag ${IMAGE_NAME}:v1 ${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
-                        sh "docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
-                    }
+                docker.withRegistry('https://registry.hub.docker.com', 'docker') {
+                    sh "docker tag ${IMAGE_NAME}:v1 ${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
+                }
             }
         }
     }
@@ -48,6 +47,7 @@ pipeline {
         }
     }
 }
+
 
 
 // def branch = "production"
