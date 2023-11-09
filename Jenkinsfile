@@ -29,10 +29,13 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', 'docker') {
-                        sh "docker tag ${imagename} ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
-                        sh "docker push ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
-                        sh "docker rmi ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
-                        sh "docker rmi ${imagename} || true"
+                        def imageTag = "${dockerusername}/${dockerimage}:${env.BUILD_NUMBER}"
+
+                        // Tag the image
+                        sh "docker tag ${dockerimage}:${env.BUILD_NUMBER} ${imageTag}"
+
+                        // Push the image
+                        sh "docker push ${imageTag}"
                     }
                 }
             }
