@@ -11,7 +11,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE_NAME = 'dumbmerch-be-production'
-        DOCKER_REGISTRY = 'https://hub.docker.com/' 
+        DOCKER_REGISTRY = 'https://registry.hub.docker.com/v2/' 
     }
 
     stages {
