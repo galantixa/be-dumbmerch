@@ -8,7 +8,7 @@ def cred = "docker"
 pipeline {
     agent any
 
-    stages {
+    stages ('checkout'){
         stage('Checkout') {
             steps {
                 script {
