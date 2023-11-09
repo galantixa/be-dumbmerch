@@ -9,14 +9,19 @@ pipeline {
     agent any
     
     environment {
-        GIT_CREDENTIALS = credentials('github') // Sesuaikan dengan ID kredensial yang telah Anda buat
+        GIT_CREDENTIALS = credentials('github')
     }
     
     stages {
         stage('Clone') {
             steps {
                 script {
-                    git branch: branch, credentialsId: GIT_CREDENTIALS, url: repo
+                    script {
+                    git branch: branch, 
+                        credentialsId: GIT_CREDENTIALS, 
+                        url: repo, 
+                        sshAgent: null 
+                }
                 }
             }
         }
