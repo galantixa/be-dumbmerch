@@ -1,48 +1,53 @@
-pipeline {
-    agent any
+def branch = "production"
+def repo = "https://github.com/galantixa/be-dumbmerch.git"
+def dir = "be-dumbmerch" 
+def imagename = "dumbmerch-be-production"
+def dockerusername = "galantixa"
+def cred = "docker"
+
+node {
+    agent any 
     
-    environment {
-        GIT_REPO = 'git@github.com:galantixa/be-dumbmerch.git'
-        IMAGE_NAME = 'dumbmerch-be-production'
-        DOCKER_USERNAME = 'galantixa'
-    }
-
     stages {
-        stage('Clone Repository') {
-            steps {
-                git branch: 'production', url: GIT_REPO
-            }
-        }
-
-        stage('Build Image') {
+        stage('Clone') {
             steps {
                 script {
-                    docker.build(IMAGE_NAME)
+                    git branch: branch, url: repo
                 }
             }
         }
 
+        stage('Build') {
+            steps {
+                script {
+                    sh "docker build -t ${imagename}:v1 ${dir}"
+                    sh "cd ${dir} && rm -rf *"
+                }
+            }
+        }
+        
         stage('Push Image') {
             steps {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', 'docker') {
-                        docker.image(IMAGE_NAME).push("${env.BUILD_NUMBER}")
+                        sh "docker tag ${imagename}:v1 ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
+                        sh "docker push ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
+                        sh "docker rmi ${dockerusername}/${imagename}:${env.BUILD_NUMBER}"
+                        sh "docker rmi ${imagename} || true"
                     }
                 }
             }
         }
-    }
-
-    post {
-        success {
-            echo 'Pipeline selesai. Semua tahapan berhasil.'
-        }
-        failure {
-            echo 'Pipeline gagal. Mohon periksa log untuk detail kesalahan.'
+        
+        stage('Update Manifest') {
+            steps {
+                script {
+                    build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
+                }
+            }
         }
     }
 }
-
 
 
 
