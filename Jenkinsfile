@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     environment {
-        GIT_BRANCH = 'main'
+        GIT_BRANCH = 'production'
         REPO_URL = 'https://github.com/galantixa/be-dumbmerch.git'
         DIR_NAME = 'be-dumbmerch'
         IMAGE_NAME = 'dumbmerch-be-production'
@@ -24,14 +24,14 @@ pipeline {
 
         stage('Build Image') {
             steps {
-                sh "docker build -t ${IMAGE_NAME}:latest ${DIR_NAME}"
+                sh "docker build -t ${DOCKER_USERNAME}/${IMAGE_NAME}:latest ${DIR_NAME}"
             }
         }
 
         stage('Push Image') {
             steps {
                 docker.withRegistry('https://registry.hub.docker.com', 'docker') {
-                    sh "docker tag ${IMAGE_NAME}:v1 ${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    sh "docker tag ${DOCKER_USERNAME}/${IMAGE_NAME}:latest ${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
                     sh "docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
                 }
             }
@@ -47,6 +47,7 @@ pipeline {
         }
     }
 }
+
 
 
 
