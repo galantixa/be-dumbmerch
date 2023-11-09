@@ -15,7 +15,8 @@ pipeline {
     stages {
         stage('Clone') {
             steps {
-                checkout scm
+                script {
+                    checkout scm
                 }
             }
         }
