@@ -1,30 +1,60 @@
-node {
-    def app
-
-    stage('Clone repository') {
-      
-
-        checkout scm
-    }
-
-    stage('Build image') {
-  
-       app = docker.build("galantixa/be-dumbmerch-prodcution")
-    }
-
-    stage('Push image') {
-        
-        docker.withRegistry('https://registry.hub.docker.com', 'docker') {
-            app.push("${env.BUILD_NUMBER}")
-        }
-    }
+pipeline {
+    agent any
     
-    stage('Trigger ManifestUpdate') {
-                echo "triggering updatemanifestjob"
-                build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
-        }
-}
+    environment {
+        GIT_BRANCH = 'main'
+        REPO_URL = 'https://github.com/galantixa/be-dumbmerch.git'
+        DIR_NAME = 'be-dumbmerch'
+        IMAGE_NAME = 'dumbmerch-be-production'
+        DOCKER_USERNAME = 'galantixa'
+    }
 
+    stages {
+        stage('Pull Repository') {
+            steps {
+                script {
+                    checkout([$class: 'GitSCM', branches: [[name: GIT_BRANCH]], userRemoteConfigs: [[url: REPO_URL]]])
+                }
+            }
+        }
+
+        stage('Clone') {
+            steps {
+                script {
+                    git branch: GIT_BRANCH, url: REPO_URL, directory: DIR_NAME
+                }
+            }
+        }
+
+        stage('Build Image') {
+            steps {
+                script {
+                    sh "docker build -t ${IMAGE_NAME}:latest ${DIR_NAME}"
+                }
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker') {
+                        sh "docker tag ${IMAGE_NAME}:v1 ${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
+                        sh "docker push ${DOCKER_USERNAME}/${IMAGE_NAME}:${env.BUILD_NUMBER}"
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline selesai. Semua tahapan berhasil.'
+        }
+        failure {
+            echo 'Pipeline gagal. Mohon periksa log untuk detail kesalahan.'
+        }
+    }
+}
 
 
 // def branch = "production"
