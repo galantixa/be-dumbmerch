@@ -11,7 +11,9 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout([$class: 'GitSCM', branches: [[name: branch]], userRemoteConfigs: [[url: repo]]])
+                withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+                checkout([$class: 'GitSCM', branches: [[name: branch]], userRemoteConfigs: [[url: repo, credentialsId: 'github']]])
+                }
             }
         }
 
