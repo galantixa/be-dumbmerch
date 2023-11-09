@@ -12,13 +12,7 @@ pipeline {
         stage('Clone') {
             steps {
                 script {
-                    // git branch: branch, url: repo
-                    // sh "git clone ${repo}"
-                    checkout scm
-                    sh "cd ${dir}"
-                    sh "git checkout ${branch}"
-                    sh "git pull origin ${branch}"
-                    sh "cd"
+                    checkout([$class: 'GitSCM', branches: [[name: 'production']], userRemoteConfigs: [[url: 'https://github.com/galantixa/be-dumbmerch.git']]])
                 }
             }
         }
