@@ -40,7 +40,8 @@ pipeline {
                     def imageTag = "${DOCKERUSERNAME}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
                     sh "docker tag ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} ${imageTag}"
                     sh "docker push ${imageTag}"
-                    sh "docker rmi ${imageTag} --force"
+                    sh "docker rmi ${imageTag}"
+                    sh "docker rmi ${DOCKERUSERNAME}/${${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}} || true"
                 }
             }
         }
@@ -53,78 +54,3 @@ pipeline {
         }
     }
 }
-
-
-
-
-
-
-
-// def branch = "production"
-// def repo = "git@github.com:galantixa/be-dumbmerch.git"
-// def cred = "adminuser"
-// def dir = "~/be-dumbmerch"
-// def server = "adminuser@"
-// def imagename = "dumbmerch-be-production"
-// def dockerusername = "galantixa"
-// def dockerpass = "dckr_pat_-uWxmibjWrkcl0syj8SQG2hOOJM"
-
-// pipeline {
-//     agent any
-    
-//     stages {
-//         stage('Repo pull') {
-//             steps {
-//                 script {
-//                     sshagent(credentials: [cred]) {
-//                         sh """
-//                             ssh -o StrictHostKeyChecking=no -T ${server} << EOF
-//                                 git clone ${repo}
-//                                 cd ${dir}
-//                                 git checkout ${branch}
-//                                 git pull origin ${branch}
-//                                 exit
-//                             EOF
-//                         """
-//                     }
-//                 }
-//             }
-//         }
-
-//         stage('Image build') {
-//             steps {
-//                 script {
-//                     sshagent(credentials: [cred]) {
-//                         sh """
-//                             ssh -o StrictHostKeyChecking=no -T ${server} << EOF
-//                                 cd ${dir}
-//                                 docker build -t ${imagename}:latest .
-//                                 exit
-//                             EOF
-//                         """
-//                     }
-//                 }
-//             }
-//         }
-
-//         stage('Image push') {
-//             steps {
-//                 script {
-//                     sshagent(credentials: [cred]) {
-//                         sh """
-//                             ssh -o StrictHostKeyChecking=no -T ${server} << EOF
-//                                 docker login -u ${dockerusername} -p ${dockerpass}
-//                                 docker image tag ${imagename}:latest ${dockerusername}/${imagename}:latest
-//                                 docker image push ${dockerusername}/${imagename}:latest
-//                                 docker image rm ${dockerusername}/${imagename}:latest
-//                                 docker image rm ${imagename}:latest || true
-//                                 cd && rm -rf ${dir}
-//                                 exit
-//                             EOF
-//                         """
-//                     }
-//                 }
-//             }
-//         }
-//     }
-// }
