@@ -41,7 +41,7 @@ pipeline {
                     sh "docker tag ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} ${imageTag}"
                     sh "docker push ${imageTag}"
                     sh "docker rmi ${imageTag}"
-                    sh "docker rmi ${DOCKERUSERNAME}/${${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}} || true"
+                    sh "docker rmi  ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} || true"
                 }
             }
         }
