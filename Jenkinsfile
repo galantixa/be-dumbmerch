@@ -40,6 +40,7 @@ pipeline {
                     def imageTag = "${DOCKERUSERNAME}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
                     sh "docker tag ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} ${imageTag}"
                     sh "docker push ${imageTag}"
+                    sh "docker rmi ${imageTag} --force"
                 }
             }
         }
