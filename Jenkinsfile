@@ -34,9 +34,9 @@ pipeline {
             }
         }
 
-        stage ('push image') {
+        stage('push image') {
             steps {
-                script{
+                script {
                     def imageTag = "${DOCKERUSERNAME}/${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER}"
                     sh "docker tag ${DOCKER_IMAGE_NAME}:${env.BUILD_NUMBER} ${imageTag}"
                     sh "docker push ${imageTag}"
@@ -46,7 +46,7 @@ pipeline {
         stage('Update Manifest') {
             steps {
                 script {
-                    build job: 'updatemanifest', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
+                    build job: 'updatemanifest-v', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
                 }
             }
         }
